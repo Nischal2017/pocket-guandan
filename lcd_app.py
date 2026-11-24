@@ -1,11 +1,12 @@
 """App-window protocol v1: foreground-only A and fingerprint gestures."""
 import argparse,asyncio,socket,struct
-from dbus_fast.aio import MessageBus
-from dbus_fast import Message,MessageType,BusType
 from pocket import Table
+from ui_text import LANGUAGES
 SVC='ai.pamir.Lapis1'; MGR=SVC+'.AppWindowManager'; PATH='/ai/pamir/Lapis1/AppWindowManager'; HDR=struct.Struct('<4sHHHHIIIQQQII')
-async def main(opening_seed=None):
-    t=Table(opening_seed);bus=await MessageBus(bus_type=BusType.SYSTEM,negotiate_unix_fd=True).connect();loop=asyncio.get_running_loop()
+async def main(opening_seed=None, lang='en'):
+    from dbus_fast.aio import MessageBus
+    from dbus_fast import Message,MessageType,BusType
+    t=Table(opening_seed, lang=lang);bus=await MessageBus(bus_type=BusType.SYSTEM,negotiate_unix_fd=True).connect();loop=asyncio.get_running_loop()
     async def call(method,sig='',body=(),fds=()):
         r=await bus.call(Message(destination=SVC,path=PATH,interface=MGR,member=method,signature=sig,body=list(body),unix_fds=list(fds)))
         if r.message_type==MessageType.ERROR:raise RuntimeError(method,r.error_name,r.body)
@@ -31,7 +32,12 @@ async def main(opening_seed=None):
             elif kind==4 and not shown:shown=True;print('first frame presented; focused gesture routing requested',flush=True)
             elif kind==6:break
     bus.disconnect()
-if __name__=='__main__':
+def parse_args(argv=None):
     parser=argparse.ArgumentParser()
     parser.add_argument('--opening-seed',type=int,help='Reproducible first deal only; replays are shuffled normally.')
-    asyncio.run(main(parser.parse_args().opening_seed))
+    parser.add_argument('--lang', choices=LANGUAGES, default='en', help='Display language (default: en).')
+    return parser.parse_args(argv)
+
+if __name__=='__main__':
+    args=parse_args()
+    asyncio.run(main(args.opening_seed, args.lang))

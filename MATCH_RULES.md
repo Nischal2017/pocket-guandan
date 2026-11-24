@@ -1,8 +1,38 @@
-# 口袋掼蛋 · 连打规则
+# How a match works
 
-* 首局从 2 开始，双方各记自己的级数。头游所在队下局坐庄；头游的对家为二游、三游或末游时，该队分别升 3、2 或 1 级；最高升到 A。比如打 2 双上，下一局打 5；下一局的配子就是 ♥5，♥2 为普通牌。
-* 当庄家实际打 A，且该队拿头游、队友不落末游，才算过 A、整场胜出。没过关的队保留 A；本版不采用「三次不过退回 2」的地方规则。
-* 首局无贡。之后单贡由末游给头游，双下时两位输家各进一张；每人出新局中最大的非配子牌。同值可自行挑花色。双贡中贡牌较大者给头游并先出；贡牌同大时，按从头游起顺时针遇到的输家优先。这是本版的平贡约定。
-* 得贡者从原手牌还一张非级牌的 2–10；若没有则还最小的非配子牌。贡牌和还牌均选妥后一起交换，每家仍有 27 张。
-* 单贡者独持两张大王，或双贡方两人合持两张大王，均抗贡；不用交换，由上一局头游先出。未抗贡的单贡局由进贡者先出。
-* 结算页按 A 进入下一局。贡牌环节左右滑只定位合法候选，上滑选定、下滑撤选，A 确认。普通出牌手势不变。
+Guandan uses two 54-card decks. Each seat gets 27 cards; partners sit across from each other. Both teams start at level 2 and track their levels separately.
+
+## Play a trick
+
+Lead a legal combination, or beat the play on the table with a stronger combination of the same type. Bombs can also beat ordinary combinations. If you don't want to beat the play, pass. When everyone else passes, the table clears and the last player to play leads again. If that player has gone out, their partner takes the lead if still in play.
+
+- The ordinary combinations are singles, pairs, triples, a triple with a pair, a five-card straight, three consecutive pairs, and two consecutive triples. Runs use natural rank order; an ace can be low or high but cannot wrap around.
+- Outside runs, the level rank beats the other ordinary ranks but not the jokers. The **heart of the current level** is wild: it can represent an ordinary card, but cannot create a joker. One bare wild plays as the level rank; two bare wilds form a pair of that rank.
+- Four or more of a rank form a bomb. A straight flush beats a five-card bomb but loses to a six-card bomb. All four jokers together beat everything.
+
+## Promotion
+
+The team of the **first player out** advances. How far it advances depends on where that player's partner finishes:
+
+| Partner finishes | Gain |
+| --- | --- |
+| Second | 3 levels |
+| Third | 2 levels |
+| Last | 1 level |
+
+The next deal uses the winning team's new level, capped at ace. For example, partners who finish first and second at level 2 advance to level 5: the heart 5 is now wild, not the heart 2.
+
+Reaching ace does not itself win the match. The team **playing its own ace level** must take first place and keep its partner out of last place. A failed attempt leaves the team at ace. This version does not use the three-failures reset variant.
+
+## Tribute and returns
+
+The first deal has no exchange. Before subsequent deals:
+
+1. **Single tribute:** the previous last finisher gives their strongest non-wild card to the first finisher. The giver leads the new deal.
+2. **Double tribute:** if partners took first and second, both opponents give their strongest non-wild card. The higher tribute goes to the first finisher, and its giver leads. If tied, this version gives priority to the first giver clockwise from the first finisher. Cards tied in strength can be chosen individually by suit.
+3. **Return:** each recipient chooses a non-level card from 2 through 10 from their original hand. If they have none, they return a weakest non-wild card instead. All exchanges are applied together so every seat starts play with 27 cards.
+4. **Exemption:** if the required giver or givers hold both high jokers between them, no cards are exchanged. The previous first finisher leads.
+
+On your exchange turn, left/right swipes visit only legal candidates. Swipe up to select one, down to undo, and press **A** to confirm.
+
+[Back to the game](README.md) · [中文规则](docs/MATCH_RULES.zh-CN.md)

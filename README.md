@@ -1,10 +1,22 @@
-# 口袋掼蛋｜Lapis 中文版
+# Pocket Guandan
 
-给 Lapis 机身 400×240 黑白 LCD 的单机四人掼蛋。你和对家组队，另外三席由电脑控制。无需联网或账号。
+A four-player partnership card game for the **400 × 240 monochrome LCD on a Lapis device**. You and the bot across the table play against two other bots. Your 27 cards fan out by rank, with matching cards stacked vertically so you can see each suit. Once a card reaches the table, it stays spread out beside the name of the player who played it.
 
-## 开始玩
+[中文说明](docs/README.zh-CN.md) · [Match rules](MATCH_RULES.md)
 
-在具有小屏窗口和指纹手势支持的 Lapis 设备上，克隆本仓库并运行：
+## Demo
+
+![Animated gameplay: selecting cards from a vertical stack, playing the pair, and watching the next seat respond](docs/media/pocket-guandan-demo.gif)
+
+The demo uses the game's English LCD renderer and a seeded deal. It shows the pixels the app draws, not a camera recording of the device.
+
+| Two 7s selected from one stack | Choosing what the heart wildcard represents |
+| :---: | :---: |
+| [![Two physical sevens lifted from their stack](docs/media/stacked-hand.png)](docs/media/stacked-hand.png) | [![An ambiguous full house with two possible interpretations](docs/media/wildcard-choice.png)](docs/media/wildcard-choice.png) |
+
+## Run on Lapis
+
+On a Lapis device with mini-app windows and fingerprint gestures enabled:
 
 ```sh
 gh repo clone TianqiYe/pocket-guandan
@@ -12,19 +24,27 @@ cd pocket-guandan
 python3 lcd_app.py
 ```
 
-也可以从 GitHub 下载 ZIP，在设备上解压，进入包含 `lcd_app.py` 的目录后执行同一条 Python 命令。运行时保持终端开启；应用在系统列表里显示为 **Guandan Hand**。关闭进程后不会保留牌局。
+English is the default. For Chinese, run `python3 lcd_app.py --lang zh`. Keep the process running while you play. In the app switcher, look for **Guandan Hand**. Switching away pauses play; exiting the process ends the match.
 
-## 操作
+The app needs Python 3.10+, `dbus_fast`, system Cairo (`libcairo.so.2`), a suitable font (Noto Sans CJK SC for Chinese), and an account permitted to open Lapis display windows. The LCD launcher is device-specific; it isn't a desktop or browser game.
 
-- 指纹区左右滑动：换一叠。轻点：沿同点数的竖叠挑花色。每次上滑选一张，下滑撤一张。级牌红桃另放一叠。
-- 按 A 出牌；跟牌时不选任何牌，按 A 即为过牌。B 打开系统应用列表。
-- 当前级数的红桃是配子。如果选牌后出现「1/2」一类标记，按住 A 半秒后松开以切换解释，短按 A 确认。
-- 结算后按 A 继续升级与进贡。详见 MATCH_RULES.md。
+## Your first turn
 
-## 运行环境
+| Control | Action |
+| --- | --- |
+| Swipe left / right | Move to another rank stack. The heart wildcard has its own stack. |
+| Tap the fingerprint pad | Move to the next physical card in the stack to pick a particular suit. |
+| Swipe up / down | Add one card from this stack to your selection / remove one. |
+| Short-press A | Play the selection. With nothing selected, pass if another play is on the table. |
+| Hold A, then release | When a selection has several legal meanings, cycle through them without playing. Short-press A to confirm. |
+| B | Open the system app switcher. |
 
-需支持小屏应用窗口、前台指纹手势和按键的 Lapis 系统，以及 Python 3.10+、dbus_fast、libcairo.so.2 和中文字体（推荐 Noto Sans CJK SC）。使用设备上有显示客户端权限的普通用户运行。此包不是手机安装包，也不是浏览器游戏。
+For example, move to the 7s and swipe up twice for a pair. To choose a particular 7 first, tap until its corner is marked, then swipe up. Selected cards are inverted. The highlighted seat shows whose turn it is; the label beside the played cards shows **who played them**, even after someone passes.
 
-## 开发
+A match starts at level 2 and includes promotion, heart wildcards, tribute, and returns. Press **A** on the result screen to continue to the next deal. [See the rules and house conventions.](MATCH_RULES.md)
 
-运行测试：`python3 -m unittest discover -v`。已知输入问题：轻点紧接上滑时，两种手势有时都会触发；滑动优先的延迟判定尚未实现。
+## Development
+
+Run `python3 -m unittest discover -v`. Rules tests don't need an LCD; frame-rendering tests use Cairo. Regenerate the demo with `python3 tools/render_demo.py` (requires FFmpeg).
+
+Known input issue: some fingerprint pads report both a tap and an upward swipe for one motion. A swipe-first debounce has been discussed but isn't implemented in this version.

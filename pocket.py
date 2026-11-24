@@ -1,12 +1,14 @@
 """Physical-card selection and foreground-only controls for Pocket Guandan."""
 import time
 from matchplay import Match
+from ui_text import language
 
 SEATS = ('你','下家','队友','上家')
 
 
 class Table:
-    def __init__(self, seed=None):
+    def __init__(self, seed=None, lang='en'):
+        self.lang = language(lang)
         self.visible = False
         self.deal = 0
         self.reset(seed)
