@@ -494,4 +494,16 @@ class PhysicalGame(Game):
             return yes + [None] + no
         return legal
 
-    choose_ai_move = Game.bot_move
+    def bot_move(self, difficulty='classic'):
+        """Classic preserves the original recommendation. Hard receives a restricted view."""
+        if difficulty == 'classic':
+            return super().bot_move()
+        if difficulty != 'hard':
+            raise ValueError('unknown bot difficulty')
+        if self.over: return None
+        from hardbot import choose
+        return choose(tuple(self.hands[self.turn]), self.options(), self.level,
+                      self.turn, self.owner, self.top,
+                      tuple(min(11, len(h)) for h in self.hands))
+
+    choose_ai_move = bot_move

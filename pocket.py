@@ -7,7 +7,9 @@ SEATS = ('你','下家','队友','上家')
 
 
 class Table:
-    def __init__(self, seed=None, lang='en'):
+    def __init__(self, seed=None, lang='en', difficulty='hard'):
+        if difficulty not in ('classic','hard'):raise ValueError('unknown bot difficulty')
+        self.difficulty=difficulty
         self.lang = language(lang)
         self.visible = False
         self.deal = 0
@@ -211,7 +213,7 @@ class Table:
     def tick(self):
         if not self.visible or time.monotonic()<self.until: return
         if self.match.phase == 'tribute' and self.match.actor != 0: self.tribute_action()
-        elif self.match.phase == 'play' and not self.game.over and self.game.turn != 0: self.play(self.game.bot_move())
+        elif self.match.phase == 'play' and not self.game.over and self.game.turn != 0: self.play(self.game.bot_move(self.difficulty if self.game.turn % 2 else 'classic'))
 
     def frame(self):
         from hand_view import render

@@ -12,7 +12,11 @@ cd pocket-guandan
 python3 lcd_app.py --lang zh
 ```
 
-也可以从 GitHub 下载 ZIP，在设备上解压，进入包含 `lcd_app.py` 的目录后执行同一条 Python 命令。运行时保持终端开启；应用在系统列表里显示为 **Guandan Hand**。关闭进程后不会保留牌局。
+也可以从 GitHub 下载 ZIP，在设备上解压，进入包含 `lcd_app.py` 的目录后执行同一条 Python 命令。运行时保持终端开启；应用在系统列表里显示为 **Guandan Hard**（普通难度为 **Guandan Hand**）。关闭进程后不会保留牌局。
+
+## 难度
+
+两位对手默认使用困难策略；你的队友仍然使用经典策略。发牌和规则不变。想换回老对手，运行 `python3 lcd_app.py --lang zh --difficulty classic`。
 
 ## 操作
 

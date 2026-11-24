@@ -24,9 +24,21 @@ cd pocket-guandan
 python3 lcd_app.py
 ```
 
-English is the default. For Chinese, run `python3 lcd_app.py --lang zh`. Keep the process running while you play. In the app switcher, look for **Guandan Hand**. Switching away pauses play; exiting the process ends the match.
+English is the default. For Chinese, run `python3 lcd_app.py --lang zh`. Keep the process running while you play. In the app switcher, look for **Guandan Hard** (or **Guandan Hand** in Classic mode). Switching away pauses play; exiting the process ends the match.
 
 The app needs Python 3.10+, `dbus_fast`, system Cairo (`libcairo.so.2`), a suitable font (Noto Sans CJK SC for Chinese), and an account permitted to open Lapis display windows. The LCD launcher is device-specific; it isn't a desktop or browser game.
+
+## Opponent difficulty
+
+**Hard** is the default for the two opponents. Your partner keeps the original Classic policy in both modes. The deal, level rules, tribute, and legal moves are identical; difficulty does not change the cards. To play the previous version's opponents, use:
+
+```sh
+python3 lcd_app.py --difficulty classic
+```
+
+Hard scores each play by the shape of its remaining hand, avoids cheap last-card leads to an opponent, and looks for low leads to a nearly-out partner. It gets only its own hand, legal options, the table play and public remaining counts (above ten is just “more than ten”).
+
+On 104 duplicate deals across levels 2–A (208 rounds), Hard took first place 130 times (62.5%) versus 78 for Classic, with 71 vs. 36 partnership sweeps. Reproduce with `python3 tools/bench_ai.py --deals 104 --seed 10000`. Each physical deal is played twice with the teams swapped. The benchmark reports first-outs and 1–2 finishes, not an estimated win rate against people.
 
 ## Your first turn
 

@@ -27,7 +27,7 @@ class Replay:
         return self.now
 
     def deal(self):
-        self.table = Table(0, lang='en')
+        self.table = Table(0, lang='en', difficulty='classic')
         self.table.focus(True)
 
     def send(self, *codes):
