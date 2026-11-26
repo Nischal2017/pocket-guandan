@@ -28,9 +28,20 @@ class Snapshot(unittest.TestCase):
         t = Table(3)
         s = net.snapshot(t, 2)
         self.assertEqual([tuple(c) for c in s['hand']], t.game.hands[2])
-        self.assertEqual(s['counts'], [27] * 4)
+        self.assertEqual(s['counts'], [27, 11, 11, 11])
         self.assertEqual(s['turn'], 2)  # host (seat 0) leads; that's 'Partner' for seat 2
         self.assertNotIn(str(list(t.game.hands[0][0])), str({k: v for k, v in s.items() if k != 'hand'}))
+
+    def test_wire_counts_at_threshold_from_each_seat(self):
+        for counts in ((27, 14, 11, 10), (9, 0, 20, 1)):
+            t = Table(3)
+            t.game.hands = [h[:n] for h, n in zip(t.game.hands, counts)]
+            for seat in (1, 2, 3):
+                with self.subTest(counts=counts, seat=seat):
+                    snap = json.loads(json.dumps(net.snapshot(t, seat)))
+                    expected = [counts[seat]] + [min(counts[(seat+i)%4], 11) for i in (1, 2, 3)]
+                    self.assertEqual(snap['counts'], expected)
+                    self.assertEqual(list(map(len, net._mirror_game(snap).hands)), expected)
 
     def test_forged_move_is_dropped(self):
         t = Table(3)

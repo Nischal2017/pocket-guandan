@@ -4,7 +4,7 @@ Newline-delimited JSON over a local TCP port. `tailcat serve PORT` exposes that
 port; guests reach it with `tailcat ADDR PORT` as a stdin/stdout pipe.
 
 Host -> guest: a snapshot already rotated so the guest sits at seat 0. Only the
-guest's own hand is sent; other hands are card counts.
+guest's own hand is sent; other counts are exact at 0..10, or 11 for 'more than 10'.
 Guest -> host: {"op": "hello", "seat": n?} once, then play / pass / tribute / next.
 """
 import asyncio
@@ -64,7 +64,8 @@ def snapshot(t, seat):
     return {
         'level': g.level,
         'hand': [list(c) for c in g.hands[seat]],
-        'counts': turns([len(h) for h in g.hands]),
+        'counts': turns([len(h) if i == seat else min(len(h), 11)
+                         for i, h in enumerate(g.hands)]),
         'turn': rel(g.turn), 'owner': rel(g.owner), 'over': g.over,
         'finish': [rel(s) for s in g.finish],
         'top': _move_json(g.top) if g.top else None,
