@@ -1,5 +1,5 @@
 """App-window protocol v1: foreground-only A and fingerprint gestures."""
-import argparse,asyncio,socket,struct
+import argparse,asyncio,signal,socket,struct,sys
 from pocket import Table
 from ui_text import LANGUAGES
 SVC='ai.pamir.Lapis1'; MGR=SVC+'.AppWindowManager'; PATH='/ai/pamir/Lapis1/AppWindowManager'; HDR=struct.Struct('<4sHHHHIIIQQQII')
@@ -55,4 +55,5 @@ def parse_args(argv=None):
 
 if __name__=='__main__':
     args=parse_args()
+    signal.signal(signal.SIGTERM,lambda*_:sys.exit(0))  # unwind so the tailcat child is stopped
     asyncio.run(main(args.opening_seed, args.lang, args.difficulty, args.host, args.join, args.seat, args.port, not args.no_tailcat))

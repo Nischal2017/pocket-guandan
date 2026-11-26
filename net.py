@@ -20,6 +20,7 @@ from pocket import Table
 from ui_text import language
 
 PORT = 7777
+PING, GUEST_TIMEOUT = 5, 20  # seconds; a killed tailcat client never sends EOF
 _BUNDLED = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'bin', 'tailcat')
 
 
@@ -121,9 +122,9 @@ class Host:
         try:
             async for line in proc.stderr:
                 text = line.decode(errors='replace').strip()
-                if 'address:' in text:
-                    addr = text.split('address:', 1)[1].strip()
-                    print(f'\nGuests join with:\n  python3 lcd_app.py --join {addr}\n', flush=True)
+                # "...new address: ADDR" or '...saved key "default": ADDR'
+                if m := re.search(r'listening with .*:\s*(\S{40,})$', text):
+                    print(f'\nGuests join with:\n  python3 lcd_app.py --join {m.group(1)}\n', flush=True)
                 elif text:
                     print('tailcat:', text, flush=True)
         finally:
@@ -134,7 +135,11 @@ class Host:
     async def _guest(self, reader, writer):
         seat = None
         try:
-            hello = json.loads(await reader.readline() or b'{}')
+            hello = json.loads(await reader.readline())
+        except (ValueError, ConnectionError):
+            writer.close()  # not a guest (e.g. a bare port probe)
+            return
+        try:
             free = [s for s in SEAT_ORDER if s not in self.t.remote]
             want = hello.get('seat')
             seat = want if want in free else (free[0] if free else None)
@@ -144,8 +149,10 @@ class Host:
             self.t.remote.add(seat)
             self.clients[seat] = (writer, None)
             print(f'guest joined seat {seat}', flush=True)
-            async for line in reader:
+            while line := await asyncio.wait_for(reader.readline(), GUEST_TIMEOUT):
                 apply_action(self.t, seat, json.loads(line))
+        except asyncio.TimeoutError:
+            print(f'guest seat {seat}: silent for {GUEST_TIMEOUT}s', flush=True)
         except (ConnectionError, json.JSONDecodeError, asyncio.IncompleteReadError) as e:
             print(f'guest seat {seat}: {e!r}', flush=True)
         finally:
@@ -264,8 +271,13 @@ async def join(t, addr, seat=None, port=PORT):
             writer.write(json.dumps(await outbox.get()).encode() + b'\n')
             await writer.drain()
 
+    async def ping():
+        while True:
+            await asyncio.sleep(PING)
+            outbox.put_nowait({'op': 'ping'})
+
     outbox.put_nowait({'op': 'hello', 'seat': seat})
-    sender = asyncio.create_task(pump_out())
+    sender, pinger = asyncio.create_task(pump_out()), asyncio.create_task(ping())
     try:
         async for line in reader:
             s = json.loads(line)
@@ -274,10 +286,14 @@ async def join(t, addr, seat=None, port=PORT):
                 break
             t.apply(s)
     finally:
-        sender.cancel()
+        sender.cancel(); pinger.cancel()
+        writer.close()  # EOF lets the host free the seat at once
         if proc and proc.returncode is None:
-            proc.terminate()
-            await proc.wait()
+            try:
+                await asyncio.wait_for(proc.wait(), 2)  # let tailcat pass the EOF on
+            except asyncio.TimeoutError:
+                proc.terminate()
+                await proc.wait()
         t.match = None
         if t.status in ('Connecting…', 'Waiting for host…'):
             t.status = 'Disconnected from host'

@@ -58,6 +58,25 @@ class Seating(unittest.TestCase):
         self.assertEqual(t.bot_difficulty(2), t.bot_difficulty(3))
 
 
+class SilentGuest(unittest.TestCase):
+    def test_seat_freed_after_timeout(self):
+        async def run():
+            t = Table(1)
+            host = net.Host(t, port=0)
+            server = await asyncio.start_server(host._guest, '127.0.0.1', 0)
+            _, w = await asyncio.open_connection('127.0.0.1', server.sockets[0].getsockname()[1])
+            w.write(b'{"op": "hello"}\n')
+            for _ in range(50):
+                await asyncio.sleep(.02)
+                if t.remote: break
+            self.assertEqual(t.remote, {1})
+            await asyncio.sleep(.5)  # connection stays open but says nothing
+            self.assertEqual(t.remote, set())
+            w.close(); server.close()
+        with patch.object(net, 'GUEST_TIMEOUT', .2):
+            asyncio.run(run())
+
+
 class FullMatch(unittest.TestCase):
     def test_host_and_two_guests(self):
         with patch('pocket.time', FastClock()):
